@@ -542,6 +542,7 @@ async def download(data):
                 for n in range(sheet.max_row - 9):
                     sheet[f"B{10 + n}"] = str(n + 1)
                     sheet[f"B{10 + n}"].alignment = alignment
+                    sheet[f"B{10 + n}"].border = border
                 wb.save(f"download/public_{department}.xlsx")
                 return send_file(path_or_file=f"../download/public_{department}.xlsx")
             if os.path.exists(f"download/personal_{department}.xlsx"):
@@ -551,6 +552,7 @@ async def download(data):
                 for n in range(sheet.max_row - 9):
                     sheet[f"B{10 + n}"] = str(n + 1)
                     sheet[f"B{10 + n}"].alignment = alignment
+                    sheet[f"B{10 + n}"].border = border
                 wb.save(f"download/personal_{department}.xlsx")
                 return send_file(path_or_file=f"../download/personal_{department}.xlsx")
     else:
@@ -924,3 +926,4 @@ async def export_excel(data):
             sheet[f"B{8 + n}"].border = border
         workbook.save(f"download/西区资产明细汇总表.xlsx")
         return send_file(path_or_file=f"../download/西区资产明细汇总表.xlsx")
+    return json.dumps({"402": "你没有权限！"}, ensure_ascii=False)

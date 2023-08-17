@@ -111,15 +111,15 @@
         $.ajax({
             url: '/admin/get_privileges?token=' + location.search.substring(7),
             success: function (data) {
+                if (data.length == 4 || data.length == 6) {
+                    $('#navigate ul li a')[5].hidden = false;
+                }
                 for (i = 0; i < data.length; i++) {
                     if (data[i] == 'query') {
                         $('#navigate ul li a')[3].hidden = false;
                     }
                     if (data[i] == 'find') {
                         $('#navigate ul li a')[4].hidden = false;
-                    }
-                    if (data[i] == 'query' || data[i] == 'find') {
-                        $('#navigate ul li a')[5].hidden = false;
                     }
                 }
             }
