@@ -258,7 +258,7 @@ async def get_all_asserts_by_department(data):
                         )
                     return "暂无人员添加生产部公共资产信息"
                 elif curr_user.username == "赵攀":
-                    files = ["财务部", "人事部", "市场部", "物流部", "行政部"]
+                    files = ["总经办", "财务部", "人事部", "市场部", "物流部", "行政部"]
                     result = {}
                     num = 0
                     for file in files:
@@ -296,7 +296,7 @@ async def get_all_asserts_by_department(data):
                     )
 
                 elif curr_user.username == "冯倩":
-                    files = ["宜昌所", "恩施办", "襄阳所", "十堰办", "荆门办", "特渠部"]
+                    files = ["宜昌所", "恩施办", "襄阳所", "十堰办", "荆门办", "荆州所", "特渠部"]
                     result = {}
                     num = 0
                     for file in files:
@@ -329,10 +329,9 @@ async def get_all_asserts_by_department(data):
                                     )
                                 )
                             result[file] = new_table
-                            return render_template(
-                                "admin_public.html", tables=result, curr_user=curr_user
-                            )
-                    return "暂无人员添加相关部门公共资产信息"
+                    return render_template(
+                        "admin_public.html", tables=result, curr_user=curr_user
+                    )
                 else:
                     return json.dumps({"402": "你没有权限！"}, ensure_ascii=False)
 
