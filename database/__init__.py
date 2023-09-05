@@ -13,25 +13,25 @@ class Database:
         self.basic = kwargs
         self.conn = None
 
-    async def connect_db(self):
+    def connect_db(self):
         """
         Connect to the database.
         """
         try:
             if self.server == sqlite3:
-                self.conn = self.server.connect(self.basic['file_address'])
+                self.conn = self.server.connect(self.basic["file_address"])
             else:
                 self.conn = self.server.connect(
-                    user=self.basic['user'],
-                    password=self.basic['password'],
-                    host=self.basic['host'],
-                    port=self.basic['port'],
-                    database=self.basic['database']
+                    user=self.basic["user"],
+                    password=self.basic["password"],
+                    host=self.basic["host"],
+                    port=self.basic["port"],
+                    database=self.basic["database"],
                 )
         except self.server.Error as e:
             return e
 
-    async def init_table(self):
+    def init_table(self):
         """
         Initialize table schema structure.
         """
@@ -40,7 +40,7 @@ class Database:
             self.conn.commit()
             print("Initialize database completed.")
 
-    async def select_db(self, table, get='*', prep=None, **condition):
+    def select_db(self, table, get="*", prep=None, **condition):
         """
         Just execute "select" sentence.
         @param table: str, table's name.
@@ -56,9 +56,13 @@ class Database:
             if len(condition) == 1:
                 sql += where
             else:
-                where = f' {prep} '.join(
-                    [f"{''.join(m.keys())}={''.join(['?'])}" for m in [{i: j} for i, j in condition.items()]])
-                sql += ' WHERE ' + where
+                where = f" {prep} ".join(
+                    [
+                        f"{''.join(m.keys())}={''.join(['?'])}"
+                        for m in [{i: j} for i, j in condition.items()]
+                    ]
+                )
+                sql += " WHERE " + where
         try:
             cursor = self.conn.execute(sql, tuple(condition.values()))
             rows = cursor.fetchall()
@@ -70,25 +74,49 @@ class Database:
             self.conn.rollback()
             return f"Error: {e}"
 
-    async def upsert(self, table, data, constraint: int = None):
-        """
-        insert or update data into table in database.
-        @param table: str, table's name.
-        @param data: dict, data's form.
-        @param constraint: int, primary key's index of data, alternative, especially for sqlite3's update sentence.
-        @return: None, except for error message.
-        """
-        keys = ','.join(data.keys())
-        values = ','.join(['?'] * len(data))
-        update = ','.join([f" {key}=?" for key in data])
+    def insert(self, table, data):
+        self.connect_db()
+        keys = ",".join(data.keys())
+        values = ",".join(["?"] * len(data))
         try:
-            if self.server == "sqlite":
-                sql = f'INSERT INTO {table}({keys}) VALUES({values}) ON CONFLICT({list(data.keys())[constraint]}) DO UPDATE SET'
-            else:
-                sql = f'INSERT INTO {table} ({keys}) VALUES ({values}) ON DUPLICATE KEY UPDATE'
-            sql += update
-            if self.conn.execute(sql, tuple(data.values()) * 2):
+            sql = f"INSERT INTO {table}({keys}) VALUES({values});"
+            if self.conn.execute(sql, tuple(data.value())):
                 self.conn.commit()
-        except self.server.Error as e:
+        except self.server.Error as ex:
             self.conn.rollback()
-            return f"Error: {e}"
+            return f"Error:{ex}"
+
+    def update(self, table, data, **condition):
+        self.connect_db()
+        s = ""
+        for k, v in data.items():
+            s += f"{k}='{v}',"
+        s = s[:-1]
+        sql = f"UPDATE {table} SET {s}"
+        where = f" WHERE {','.join(condition.keys())}={','.join(['?'])};"
+        sql += where
+        try:
+            if self.conn.execute(sql, tuple(condition.values())):
+                self.conn.commit()
+        except self.server.Error as ex:
+            self.conn.rollback()
+            return f"Error:{ex}"
+
+    def delete(self, table, **condition):
+        self.connect_db()
+        sql = f"DELETE FROM {table}"
+        where = f" WHERE {','.join(condition.keys())}={','.join(['?'])};"
+        sql += where
+        try:
+            if self.conn.execute(sql, tuple(condition.values())):
+                self.conn.commit()
+        except self.server.Error as ex:
+            self.conn.rollback()
+            return f"Error:{ex}"
+
+    def just_exe(self, sql):
+        try:
+            with self.conn.execute(sql) as cursor:
+                return cursor.fetchall()
+        except self.server.Error as ex:
+            return f"Error:{ex}"

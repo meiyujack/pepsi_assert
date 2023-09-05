@@ -12,7 +12,7 @@ from auth import WebSecurity
 db = AsyncSqlite(aiosqlite, file_address="assert.db", sql_address="table.sql")
 base = Database(sqlite3, file_address="pepsi_yc")
 
-secure = WebSecurity(os.getenv('SECRET_KEY', 'ocefjVp_pL4Iens21FTjsA'))
+secure = WebSecurity(os.getenv("SECRET_KEY", "ocefjVp_pL4Iens21FTjsA"))
 
 
 class Employee:
@@ -34,7 +34,7 @@ class Employee:
     #     self._username = value
 
     def to_dict(self):
-        properties = ['username']
+        properties = ["username"]
         return {prop: getattr(self, prop, None) for prop in properties}
 
     @staticmethod
@@ -55,36 +55,43 @@ class Employee:
 
     @staticmethod
     async def get_department_by_id(department_id):
-        department = await db.select_db('department', 'department_name', department_id=department_id)
+        department = await db.select_db(
+            "department", "department_name", department_id=department_id
+        )
         return department[0][0]
 
     @staticmethod
     async def get_user_by_token(token):
-        user_id = secure.get_info_by_token(token, 'uid')
+        user_id = secure.get_info_by_token(token, "uid")
         if user_id:
             curr_user = await Employee.get_user_by_id(user_id=user_id)
             return curr_user
 
     async def insert_user(self, user_id):
-        msg = await db.upsert('user',
-                              {'user_id': user_id, 'username': self.username, 'password': self.password},
-                              constraint=0)
+        msg = await db.insert(
+            "user",
+            {"user_id": user_id, "username": self.username, "password": self.password},
+        )
         if msg:
             return msg
         return None
 
     async def save_avatar(self, avatar_address):
-        with open(avatar_address, 'rb') as f:
+        with open(avatar_address, "rb") as f:
             # index = avatar_address.rindex('.')
             # format = avatar_address[index:]
             self.avatar = f.read()
             if len(self.avatar) < 128 * 1024:
-                await db.upsert("user", {"user_id": self.user_id, "avatar": self.avatar}, 0)
+                await db.insert(
+                    "user",
+                    {"avatar": self.avatar},
+                    user_id=self.user_id,
+                )
             else:
                 return None
 
     def __repr__(self):
-        return '<User {}>'.format(self.username)
+        return "<User {}>".format(self.username)
 
     def set_password(self, password):
         self.password = generate_password_hash(password)
@@ -95,10 +102,11 @@ class Employee:
 
     async def alter_password(self, new):
         self.set_password(password=new)
-        await db.upsert('user', {"password": self.password, "user_id": self.user_id, 'username': self.username}, 1)
+        await db.update("user", {"password": self.password}, user_id=self.user_id)
 
     async def get_privileges(self, token):
-        rid = secure.get_info_by_token(token, key='rid')
+        rid = secure.get_info_by_token(token, key="rid")
         permissions = await db.just_exe(
-            f'SELECT permission_name from permission p join role_permission rp ON p.permission_id =rp.permission_id WHERE rp.role_id ={rid};')
+            f"SELECT permission_name from permission p join role_permission rp ON p.permission_id =rp.permission_id WHERE rp.role_id ={rid};"
+        )
         return permissions
