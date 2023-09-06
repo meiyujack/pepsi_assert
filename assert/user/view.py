@@ -41,8 +41,8 @@ class ProfileIn(Schema):
     tel = String()
 
 
-class AvatarIn(TokenIn):
-    avatar = File()
+class AvatarIn(Schema):
+    avatar = String()
 
 
 @user.get("/")
@@ -107,10 +107,19 @@ async def get_your_name(data):
     return ""
 
 
+@user.get("/avatar")
+@user.input(TokenIn, location="query")
+async def avatar(data):
+    return render_template("update_avatar.html")
+
 @user.post("/avatar")
-@user.input(AvatarIn, location="form_and_files")
-async def post_avatar(data):
-    avatar_file = data["avatar"]
+@user.input(TokenIn, location="query")
+@user.input(AvatarIn,location="form_and_files")
+async def update_avatar(data,forms):
+    print(data)
+    print(forms)
+    avatar_file = forms["avatar"]
+    print(avatar_file)
     token = data["token"]
 
     uid = secure.get_info_by_token(token, "uid")
@@ -145,6 +154,7 @@ async def profile(data):
 @user.input(ProfileIn, location="form")
 @user.input(TokenIn, location="query")
 async def profile_update(data, query_data):
+    print(data)
     curr_token = query_data.get("token")
     if curr_token:
         curr_user = await Employee.get_user_by_token(curr_token)

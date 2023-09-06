@@ -5,7 +5,7 @@
 <style type="text/css">
     #navigate {
         width: 120px;
-        height: 200px;
+        height: 220px;
         margin-top: 200px;
         margin-left: 110px;
         float: left;
@@ -62,6 +62,12 @@
         top: 50px;
         left: 975px;
     }
+
+    #avatar{
+        float: right;
+        margin-top:-80px;
+        margin-right: 20px;
+    }
 </style>
 {% endblock %}
 {% block content %}
@@ -72,6 +78,7 @@
     </ul>
     <ul>
         <li><a href="{{ url_for('user.update_password',token=token) }}">修改密码</a></li>
+        <li><a href="{{ url_for('user.update_avatar',token=token) }}">修改头像</a></li>
         <br />
         <li><a href="{{ url_for('admin.get_all_asserts_by_personal',token=token) }}" hidden>管理资产</a></li>
         <li><a href="{{ url_for('admin.get_all_users',token=token) }}" hidden>管理人员</a></li>
@@ -90,7 +97,7 @@
     <!--    curr_user is not defined-->
     <!--    {% endif %}-->
     <form method="post">
-        <label for="avatar">头像</label><input type="file" name="avatar" id="file" accept="image/png, image/jpeg"><img
+        <label for="avatar">头像</label><input type="file"  id="file" name="avatar" accept="image/png, image/jpeg"><img
             src="" id="avatar">
         <label for="gender">性别</label>
         <label hidden id="gender">{{ curr_user.gender }}</label>
@@ -163,6 +170,21 @@
                 }
             });
         })
+
+        var reader=new FileReader();
+        var fileInput=document.getElementById("file");
+        var sure=document.getElementById("sure");
+        fileInput.addEventListener("change",function(){
+            var file=fileInput.files[0];
+            reader.onload=function(){
+                document.getElementById("avatar").src=reader.result;
+            };
+            reader.readAsDataURL(file);
+            //fileInput.value=reader.result;
+        });
+        //sure.addEventListener("click",function(){
+        //    alert(reader.result);
+        //});
 
     })
 </script>
