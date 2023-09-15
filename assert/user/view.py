@@ -1,13 +1,15 @@
-import json, os
+import json, os, base64
 
-from flask import redirect, url_for, g, flash
+from flask import redirect, url_for, g, flash, request
 from flask.templating import render_template
-from . import user
+from werkzeug.utils import secure_filename
 
 from apiflask import Schema, HTTPTokenAuth
 from apiflask.fields import String, Integer, File
 from apiflask.validators import Length
+from apiflask.fields import File
 
+from . import user
 from ..employee import Employee, db, secure, base
 
 token_auth = HTTPTokenAuth(scheme="token")
@@ -35,14 +37,14 @@ class TokenIn(Schema):
 
 
 class ProfileIn(Schema):
-    avatar = String()
+    avatar = File()
     gender = Integer()
     department = String()
     tel = String()
 
 
 class AvatarIn(Schema):
-    avatar = String()
+    avatar = File()
 
 
 @user.get("/")
@@ -107,29 +109,6 @@ async def get_your_name(data):
     return ""
 
 
-@user.get("/avatar")
-@user.input(TokenIn, location="query")
-async def avatar(data):
-    return render_template("update_avatar.html")
-
-@user.post("/avatar")
-@user.input(TokenIn, location="query")
-@user.input(AvatarIn,location="form_and_files")
-async def update_avatar(data,forms):
-    print(data)
-    print(forms)
-    avatar_file = forms["avatar"]
-    print(avatar_file)
-    token = data["token"]
-
-    uid = secure.get_info_by_token(token, "uid")
-    curr = await Employee.get_user_by_id(uid)
-    try:
-        await curr.save_avatar(avatar_file)
-    except:
-        return ""
-
-
 @user.get("/profile")
 @user.input(TokenIn, location="query")
 # @token_auth.login_required
@@ -151,19 +130,25 @@ async def profile(data):
 
 
 @user.post("/profile")
-@user.input(ProfileIn, location="form")
+@user.input(ProfileIn, location="form_and_files")
 @user.input(TokenIn, location="query")
 async def profile_update(data, query_data):
-    print(data)
     curr_token = query_data.get("token")
     if curr_token:
+        r = None
         curr_user = await Employee.get_user_by_token(curr_token)
         avatar = data.get("avatar")
+        if avatar:
+            avatar = base64.b64encode(avatar.read()).decode()
+            if curr_user.avatar != avatar:
+                r = await db.update(
+                    "user", {"avatar": avatar}, user_id=curr_user.user_id
+                )
+
         gender = str(data.get("gender"))
         department_id = data.get("department")
         tel = data.get("tel")
-        r = None
-        print(avatar)
+
         if gender != "None":
             if gender != curr_user.gender:
                 r = await db.update(

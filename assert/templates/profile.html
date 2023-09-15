@@ -5,7 +5,7 @@
 <style type="text/css">
     #navigate {
         width: 120px;
-        height: 220px;
+        height: 200px;
         margin-top: 200px;
         margin-left: 110px;
         float: left;
@@ -63,9 +63,9 @@
         left: 975px;
     }
 
-    #avatar{
+    #avatar {
         float: right;
-        margin-top:-80px;
+        margin-top: -80px;
         margin-right: 20px;
     }
 </style>
@@ -78,7 +78,6 @@
     </ul>
     <ul>
         <li><a href="{{ url_for('user.update_password',token=token) }}">修改密码</a></li>
-        <li><a href="{{ url_for('user.update_avatar',token=token) }}">修改头像</a></li>
         <br />
         <li><a href="{{ url_for('admin.get_all_asserts_by_personal',token=token) }}" hidden>管理资产</a></li>
         <li><a href="{{ url_for('admin.get_all_users',token=token) }}" hidden>管理人员</a></li>
@@ -97,7 +96,7 @@
     <!--    curr_user is not defined-->
     <!--    {% endif %}-->
     <form method="post">
-        <label for="avatar">头像</label><input type="file"  id="file" name="avatar" accept="image/png, image/jpeg"><img
+        <label for="avatar">头像</label><input type="file" id="file" name="avatar" accept="image/png, image/jpeg"><img
             src="" id="avatar">
         <label for="gender">性别</label>
         <label hidden id="gender">{{ curr_user.gender }}</label>
@@ -109,8 +108,8 @@
         <select name="department" id="department" required>
             <option value="">请选择部门：</option>
         </select><br>
-        <label for="tel">电话</label><input type="tel" name="tel" placeholder="{{ curr_user.telephone }}"><br>
-        <input type="submit" value="提交">
+        <label for="tel">电话</label><input type="tel" id="tel" placeholder="{{ curr_user.telephone }}"><br>
+        <input type="button" value="提交" id="sure">
     </form>
 </div>
 <script type="text/javascript">
@@ -132,6 +131,17 @@
             }
         });
 
+        function getGender() {
+            var gender = document.getElementsByName("gender");
+            for (i = 0; i < gender.length; i++) {
+                if (gender[i].checked) {
+                    return gender[i].value;
+                }
+                return null
+            }
+
+        }
+
         a = document.getElementsByTagName("a")[0];
         function show() {
             department = document.getElementById("department");
@@ -152,6 +162,7 @@
         if (department_o.text.length > 0) {
             department.selectedOptions[0].value = department_o.value;
             department.selectedOptions[0].text = department_o.text;
+            department.disabled = true;
         }
 
         $("#department").mousedown(function () {
@@ -171,20 +182,40 @@
             });
         })
 
-        var reader=new FileReader();
-        var fileInput=document.getElementById("file");
-        var sure=document.getElementById("sure");
-        fileInput.addEventListener("change",function(){
-            var file=fileInput.files[0];
-            reader.onload=function(){
-                document.getElementById("avatar").src=reader.result;
+        var reader = new FileReader();
+        var fileInput = document.getElementById("file");
+        var sure = document.getElementById("sure");
+        fileInput.addEventListener("change", function () {
+            var file = fileInput.files[0];
+            if (file.size > 10240) {
+                alert("最大图片不得超过1M");
+            }
+            reader.onload = function () {
+                document.getElementById("avatar").src = reader.result;
+
             };
             reader.readAsDataURL(file);
-            //fileInput.value=reader.result;
+
         });
-        //sure.addEventListener("click",function(){
-        //    alert(reader.result);
-        //});
+
+        //var formData = new FormData();
+        //formData.append("classIcon", reader.result);
+
+        sure.addEventListener("click", function () {
+            var formData = new FormData();
+            var gender = document.getElementsByName("gender");
+
+            if (document.getElementById("file").files.length > 0)
+                formData.append("avatar", document.getElementById("file").files[0]);
+            if (getGender() != null)
+                formData.append("gender", getGender());
+            formData.append("department", document.getElementById("department").selectedOptions[0].value);
+            formData.append("tel", document.getElementById("tel").value);
+
+            var request = new XMLHttpRequest();
+            request.open("POST", "/user/profile?token=" + location.search.substring(7));
+            request.send(formData);
+        });
 
     })
 </script>

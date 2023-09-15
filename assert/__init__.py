@@ -11,8 +11,8 @@ from .user import user
 from .ledger import ledger
 from .admin import admin
 
-app = APIFlask(__name__, title='固定资产管理系统', version='0.2',docs_ui='redoc')
-app.secret_key = os.getenv("SECRET_KEY", 'ocefjVp_pL4Iens21FTjsA')
+app = APIFlask(__name__, title="固定资产管理系统", version="0.2", docs_ui="redoc")
+app.secret_key = os.getenv("SECRET_KEY", "ocefjVp_pL4Iens21FTjsA")
 
 app.register_blueprint(user)
 app.register_blueprint(ledger)
@@ -73,35 +73,18 @@ def init_data():
     db.cursor().execute(f"INSERT INTO type (tid,name,cid) VALUES ('05','烘手机','4')")
 
     db.cursor().execute(f"INSERT INTO type (tid,name,cid) VALUES ('01','激光笔','6')")
-    db.cursor().execute(f"INSERT INTO type (tid,name,cid) VALUES ('02','TypeC转网口转换器','6')")
+    db.cursor().execute(
+        f"INSERT INTO type (tid,name,cid) VALUES ('02','TypeC转网口转换器','6')"
+    )
     db.cursor().execute(f"INSERT INTO type (tid,name,cid) VALUES ('01','轿车','7')")
     db.cursor().execute(f"INSERT INTO type (tid,name,cid) VALUES ('02','SUV','7')")
     db.cursor().execute(f"INSERT INTO type (tid,name,cid) VALUES ('03','MPV','7')")
 
     mei = Employee(104900)
-    mei.set_password('12345')
+    mei.set_password("12345")
     db.cursor().execute(
-        f"INSERT INTO user (user_id,role_id,username, password) VALUES (104900,8,'梅煜', '{mei.password}')")
-
-    ww=Employee(100342)
-    ww.set_password('123456')
-    db.cursor().execute(
-        f"INSERT INTO user (user_id,role_id,username, password) VALUES (100342,4,'汪洋', '{ww.password}')")
-
-    wang = Employee(104970)
-    wang.set_password('123456')
-    db.cursor().execute(
-        f"INSERT INTO user (user_id,role_id,username, password) VALUES (104970,2,'汪鸿','{wang.password}')")
-
-    zhao = Employee(104897)
-    zhao.set_password('123456')
-    db.cursor().execute(
-        f"INSERT INTO user (user_id,role_id,username, password) VALUES (104897,2,'赵攀','{zhao.password}')")
-
-    feng = Employee(104971)
-    feng.set_password('123456')
-    db.cursor().execute(
-        f"INSERT INTO user (user_id,role_id,username, password) VALUES (104971,2,'冯倩','{feng.password}')")
+        f"INSERT INTO user (user_id,role_id,username, password) VALUES (104900,8,'梅煜', '{mei.password}')"
+    )
 
     # 角色表
     db.cursor().execute("INSERT INTO role VALUES (8,'God', '上帝')")
@@ -118,31 +101,60 @@ def init_data():
     db.cursor().execute("INSERT INTO permission VALUES (6,'delete', '删除')")
 
     # 角色权限表
-    db.cursor().execute("INSERT INTO role_permission (role_id,permission_id) VALUES (8,1)")
-    db.cursor().execute("INSERT INTO role_permission (role_id,permission_id) VALUES (8,2)")
-    db.cursor().execute("INSERT INTO role_permission (role_id,permission_id) VALUES (8,3)")
-    db.cursor().execute("INSERT INTO role_permission (role_id,permission_id) VALUES (8,4)")
-    db.cursor().execute("INSERT INTO role_permission (role_id,permission_id) VALUES (8,5)")
-    db.cursor().execute("INSERT INTO role_permission (role_id,permission_id) VALUES (8,6)")
+    db.cursor().execute(
+        "INSERT INTO role_permission (role_id,permission_id) VALUES (8,1)"
+    )
+    db.cursor().execute(
+        "INSERT INTO role_permission (role_id,permission_id) VALUES (8,2)"
+    )
+    db.cursor().execute(
+        "INSERT INTO role_permission (role_id,permission_id) VALUES (8,3)"
+    )
+    db.cursor().execute(
+        "INSERT INTO role_permission (role_id,permission_id) VALUES (8,4)"
+    )
+    db.cursor().execute(
+        "INSERT INTO role_permission (role_id,permission_id) VALUES (8,5)"
+    )
+    db.cursor().execute(
+        "INSERT INTO role_permission (role_id,permission_id) VALUES (8,6)"
+    )
 
-    db.cursor().execute("INSERT INTO role_permission (role_id,permission_id) VALUES (4,2)")
-    db.cursor().execute("INSERT INTO role_permission (role_id,permission_id) VALUES (4,3)")
-    db.cursor().execute("INSERT INTO role_permission (role_id,permission_id) VALUES (4,4)")
-    db.cursor().execute("INSERT INTO role_permission (role_id,permission_id) VALUES (4,6)")
+    db.cursor().execute(
+        "INSERT INTO role_permission (role_id,permission_id) VALUES (4,2)"
+    )
+    db.cursor().execute(
+        "INSERT INTO role_permission (role_id,permission_id) VALUES (4,3)"
+    )
+    db.cursor().execute(
+        "INSERT INTO role_permission (role_id,permission_id) VALUES (4,4)"
+    )
+    db.cursor().execute(
+        "INSERT INTO role_permission (role_id,permission_id) VALUES (4,6)"
+    )
 
-    db.cursor().execute("INSERT INTO role_permission (role_id,permission_id) VALUES (2,1)")
-    db.cursor().execute("INSERT INTO role_permission (role_id,permission_id) VALUES (2,3)")
-    db.cursor().execute("INSERT INTO role_permission (role_id,permission_id) VALUES (2,4)")
+    db.cursor().execute(
+        "INSERT INTO role_permission (role_id,permission_id) VALUES (2,1)"
+    )
+    db.cursor().execute(
+        "INSERT INTO role_permission (role_id,permission_id) VALUES (2,3)"
+    )
+    db.cursor().execute(
+        "INSERT INTO role_permission (role_id,permission_id) VALUES (2,4)"
+    )
 
-    db.cursor().execute("INSERT INTO role_permission (role_id,permission_id) VALUES (1,2)")
+    db.cursor().execute(
+        "INSERT INTO role_permission (role_id,permission_id) VALUES (1,2)"
+    )
 
     db.commit()
     print("Datas has been inserted successful!")
 
 
 def run():
-    app.run(host="0.0.0.0",debug=True)
+    app.run(host="0.0.0.0", debug=True)
 
-@app.get('/')
+
+@app.get("/")
 def index():
-    return redirect(url_for('user.login_show'))
+    return redirect(url_for("user.login_show"))
