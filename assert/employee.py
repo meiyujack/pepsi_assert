@@ -72,9 +72,9 @@ class Employee:
             "user",
             {"user_id": user_id, "username": self.username, "password": self.password},
         )
-        if msg:
-            return msg
-        return None
+        if not msg:
+            return None
+        return msg
 
     async def save_avatar(self, avatar_address):
         with open(avatar_address, "rb") as f:

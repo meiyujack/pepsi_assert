@@ -51,10 +51,9 @@ class AsyncSqlite(Database):
         values = ",".join(["?"] * len(data))
         try:
             sql = f"INSERT INTO {table}({keys}) VALUES({values});"
-            where = f" WHERE {','.join(condition.keys())}={','.join(['?'])};"
-            sql += where
-            if await self.conn.execute(sql, tuple(condition.values())):
+            if await self.conn.execute(sql, tuple(data.values())):
                 await self.conn.commit()
+                return 0
         except self.server.Error as ex:
             await self.conn.rollback()
             return f"Error:{ex}"
