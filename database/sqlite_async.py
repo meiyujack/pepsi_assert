@@ -45,7 +45,7 @@ class AsyncSqlite(Database):
             await self.conn.rollback()
             return f"Error:{ex}"
 
-    async def insert(self, table, data, **condition):
+    async def insert(self, table, data):
         await self.connect_db()
         keys = ",".join(data.keys())
         values = ",".join(["?"] * len(data))
@@ -70,6 +70,7 @@ class AsyncSqlite(Database):
             sql += where
             if await self.conn.execute(sql, tuple(condition.values())):
                 await self.conn.commit()
+                return 0
         except self.server.Error as ex:
             await self.conn.rollback()
             return f"Error:{ex}"

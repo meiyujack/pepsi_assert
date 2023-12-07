@@ -65,8 +65,8 @@
 
     #avatar {
         float: right;
-        margin-top: -80px;
-        margin-right: 20px;
+        margin-top: -93px;
+        margin-right: 13px;
     }
 </style>
 {% endblock %}
@@ -96,8 +96,12 @@
     <!--    curr_user is not defined-->
     <!--    {% endif %}-->
     <form method="post">
-        <label for="avatar">头像</label><input type="file" id="file" name="avatar" accept="image/png, image/jpeg"><img
-            src="" id="avatar">
+        <label for="avatar">头像</label><input type="file" id="file" name="avatar" accept="image/png, image/jpeg">
+        {% if curr_user.avatar %}
+        <img src={{curr_user.avatar}} id="avatar">
+        {% else %}
+        <img id="avatar">
+        {% endif %}
         <label for="gender">性别</label>
         <label hidden id="gender">{{ curr_user.gender }}</label>
         <option id="di_dn" hidden value="{{curr_user.department_id}}">{{department}}</option>
@@ -137,9 +141,8 @@
                 if (gender[i].checked) {
                     return gender[i].value;
                 }
-                return null
             }
-
+            return null;
         }
 
         a = document.getElementsByTagName("a")[0];
@@ -182,17 +185,24 @@
             });
         })
 
+        avatar = document.getElementById("avatar");
+        if (avatar.src != '') {
+            avatar.width = 64;
+            avatar.height = 64;
+        }
         var reader = new FileReader();
         var fileInput = document.getElementById("file");
         var sure = document.getElementById("sure");
         fileInput.addEventListener("change", function () {
             var file = fileInput.files[0];
-            if (file.size > 10240) {
+            if (file.size > 1 * 1024 * 1024) {
                 alert("最大图片不得超过1M");
+                return;
             }
             reader.onload = function () {
-                document.getElementById("avatar").src = reader.result;
-
+                avatar.src = reader.result;
+                avatar.width = 64;
+                avatar.height = 64;
             };
             reader.readAsDataURL(file);
 

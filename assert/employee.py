@@ -68,13 +68,10 @@ class Employee:
             return curr_user
 
     async def insert_user(self, user_id):
-        msg = await db.insert(
+        return await db.insert(
             "user",
             {"user_id": user_id, "username": self.username, "password": self.password},
         )
-        if not msg:
-            return None
-        return msg
 
     async def save_avatar(self, avatar_address):
         with open(avatar_address, "rb") as f:

@@ -105,7 +105,7 @@ async def public_post(data, query_data):
     rows = sheet.max_row
     rows += 1
     assert_id, assert_type, assert_admin = await get_assert_basic(data)
-    msg = await db.upsert(
+    msg = await db.insert(
         "public_assert",
         {
             "aid": assert_id,
@@ -118,7 +118,6 @@ async def public_post(data, query_data):
             "department_id": int(curr_user.department_id),
             "admin_id": data["assert_admin"],
         },
-        0,
     )
     if not msg:
         flag = 1
@@ -146,6 +145,8 @@ async def public_post(data, query_data):
         "user", "username", user_id=int(data["assert_admin"])
     )
     sheet["H6"] = assert_admin[0][0]
+    if not os.path.exists("download"):
+        os.mkdir("download")
     workbook.save(f"download/public_{curr_department_name}.xlsx")
     if flag:
         flash("已添加")
@@ -191,9 +192,6 @@ async def personal_show(page, query_data):
     rows = rows[0][0]
     pagination, pages = await get_table_by_page(sheet, 8, 10, rows + 1)
     page_result = pagination[page - 1]
-    import pprint
-
-    pprint.pprint(page_result)
     return render_template(
         "personal_assert.html",
         table=page_result,
@@ -214,7 +212,7 @@ async def personal_post(page, data, query_data):
     rows = sheet.max_row
     rows += 1
     assert_id, assert_type, assert_admin = await get_assert_basic(data)
-    msg = await db.upsert(
+    msg = await db.insert(
         "personal_assert",
         {
             "aid": assert_id,
@@ -226,7 +224,6 @@ async def personal_post(page, data, query_data):
             "admin_id": data["assert_admin"],
             "personal_id": curr_user.user_id,
         },
-        0,
     )
     if not msg:
         flash("数据库已记录")
@@ -250,5 +247,7 @@ async def personal_post(page, data, query_data):
         "user", "username", user_id=int(data["assert_admin"])
     )
     sheet["H6"] = assert_admin[0][0]
+    if not os.path.exists("download"):
+        os.mkdir("download")
     workbook.save(f"download/personal_{curr_user.username}.xlsx")
     return redirect(url_for("ledger.personal_show", token=curr_token, page=1))

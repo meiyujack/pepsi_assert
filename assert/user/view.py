@@ -135,16 +135,16 @@ async def profile(data):
 async def profile_update(data, query_data):
     curr_token = query_data.get("token")
     if curr_token:
-        r = None
         curr_user = await Employee.get_user_by_token(curr_token)
         avatar = data.get("avatar")
         if avatar:
             avatar = base64.b64encode(avatar.read()).decode()
             if curr_user.avatar != avatar:
                 r = await db.update(
-                    "user", {"avatar": avatar}, user_id=curr_user.user_id
+                    "user",
+                    {"avatar": "data:image/jpeg;base64," + avatar},
+                    user_id=curr_user.user_id,
                 )
-
         gender = str(data.get("gender"))
         department_id = data.get("department")
         tel = data.get("tel")
@@ -166,7 +166,7 @@ async def profile_update(data, query_data):
                 r = await db.update(
                     "user", {"telephone": tel}, user_id=curr_user.user_id
                 )
-        if r is None:
+        if not r:
             flash(f"{curr_user.username}更新信息成功～")
             return redirect(url_for("user.profile", token=curr_token))
 
